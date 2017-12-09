@@ -25,6 +25,10 @@ func main() {
 		spiral(arg)
 	case "4":
 		passphrase()
+	case "5":
+		steps()
+	case "6":
+		bankAllocation()
 	default:
 		fmt.Println("happy holidays")
 	}
@@ -112,4 +116,83 @@ func passphrase() {
 		}
 	}
 	fmt.Println(valid, len(lines))
+}
+
+func steps() {
+	stream, _ := ioutil.ReadFile("input5.txt")
+	input := string(stream)
+	lines := strings.Split(input, "\n")
+	spaces := make([]int, len(lines))
+	for i, c := range lines {
+		spaces[i], _ = strconv.Atoi(c)
+	}
+	//number of steps taken
+	steps := 0
+	currentLocation := 0
+	var futureLocation int
+	for {
+		futureLocation = spaces[currentLocation] + currentLocation
+		spaces[currentLocation] = spaces[currentLocation] + 1
+		currentLocation = futureLocation
+		steps++
+		if futureLocation > len(spaces)-1 || futureLocation < 0 {
+			fmt.Println(steps)
+			break
+		}
+
+	}
+
+}
+
+func bankAllocation() {
+	stream, _ := ioutil.ReadFile("input6.txt")
+	input := string(stream)
+	s := strings.Fields(input)
+	banks := make([]int, len(s))
+	configuration := make(map[string]int)
+	for i, n := range s {
+		banks[i], _ = strconv.Atoi(n)
+	}
+
+	count := 0
+	for {
+		//get highest bank
+		max := 0
+		maxIndex := 0
+		for i := range banks {
+			ri := len(banks) - 1 - i
+			x := banks[ri]
+			if x >= max {
+				max = x
+				maxIndex = ri
+			}
+		}
+		banks[maxIndex] = 0
+		fmt.Println(banks, max, maxIndex)
+		//distribute blocks
+		for i := maxIndex; max > 0; max-- {
+			i++
+			fmt.Println(i, max)
+			if i == len(banks) {
+				i = 0
+			}
+			banks[i] = banks[i] + 1
+		}
+		//insert configuration into map
+		//string representation of banks
+		s := ""
+		for _, x := range banks {
+			number := strconv.Itoa(x)
+			s = s + number + ","
+		}
+		fmt.Println(s, configuration[s])
+		if configuration[s] != 0 {
+			fmt.Println(count-configuration[s], count)
+			break
+		} else {
+			configuration[s] = count
+		}
+		count++
+	}
+
 }
