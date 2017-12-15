@@ -29,6 +29,8 @@ func main() {
 		steps()
 	case "6":
 		bankAllocation()
+	case "7":
+		tree()
 	default:
 		fmt.Println("happy holidays")
 	}
@@ -168,11 +170,9 @@ func bankAllocation() {
 			}
 		}
 		banks[maxIndex] = 0
-		fmt.Println(banks, max, maxIndex)
 		//distribute blocks
 		for i := maxIndex; max > 0; max-- {
 			i++
-			fmt.Println(i, max)
 			if i == len(banks) {
 				i = 0
 			}
@@ -185,8 +185,9 @@ func bankAllocation() {
 			number := strconv.Itoa(x)
 			s = s + number + ","
 		}
-		fmt.Println(s, configuration[s])
 		if configuration[s] != 0 {
+			//last count
+			count++
 			fmt.Println(count-configuration[s], count)
 			break
 		} else {
@@ -194,5 +195,68 @@ func bankAllocation() {
 		}
 		count++
 	}
+}
 
+type node struct {
+	id       string
+	weight   int
+	children map[string]*node
+	parent   *node
+}
+
+func tree() {
+	tree := createTree()
+	var start *node
+	for _, v := range tree {
+		start = v
+	}
+	traverseDown(start)
+}
+func createTree() map[string]*node {
+	// i need this tree information on the opposite direction that thhey are giving it to me:
+	// child -> parent instead of parent -> child
+	stream, _ := ioutil.ReadFile("input7.txt")
+	input := string(stream)
+	tree := make(map[string]*node)
+	rows := strings.Split(input, "\n")
+	for _, row := range rows {
+		f := strings.Fields(row)
+		id := f[0]
+		tree[id] = &node{}
+		leaf := tree[id]
+		leaf.id = id
+		leaf.weight, _ = strconv.Atoi(strings.Trim(f[1], "()"))
+		if len(f) > 2 {
+			children := strings.Split(row, "->")[1]
+			leaf.children = make(map[string]*node)
+			for _, child := range strings.Split(children, ", ") {
+				leaf.children[strings.Trim(child, " ")] = &node{}
+			}
+
+		}
+	}
+	for _, v := range tree {
+		for id, child := range v.children {
+			child = tree[id]
+			child.parent = v
+		}
+	}
+	return tree
+}
+
+//traverse from node child -> parent
+func traverseDown(start *node) {
+	currentNode := start
+	path := ""
+	for {
+
+		path = path + currentNode.id + " -> "
+		if currentNode.parent != nil {
+			currentNode = currentNode.parent
+		} else {
+			path = path[:len(path)-4]
+			fmt.Println(path)
+			break
+		}
+	}
 }
